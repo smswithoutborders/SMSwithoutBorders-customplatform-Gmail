@@ -3,3 +3,5 @@ credentials.json
 *.sw*
 __pycache__/*
 */__pycache__/*
+token.json
+.token.json
