@@ -21,9 +21,12 @@ def create_message(sender, to, subject, message_text, sender_name=None):
     print(message)
     return {'raw' : base64.urlsafe_b64encode(message.as_string().encode('utf-8'))}
 
-def send(sender, to, subject, message_text, sender_name=None):
+def send(sender, to, subject, message_text, sender_name=None, credentials_file=None):
     try:
-        service = googleAuths.main()
+        if credentials_file is not None:
+            service = googleAuths.main(credentials_file)
+        else:
+            service = googleAuths.main()
     except Exception as error:
         raise Exception(error)
     else:
@@ -49,8 +52,19 @@ def execute(protocol, body, userDetails):
     subject=split_body[0]
     to=split_body[1]
     message_text = ":".join(split_body[2:])
+
+    # TODO: Using this as a todo, but should change the contents to be more dynamic
+    userDetails["token_path"] = "Platforms/google/token.json"
+    userDetails["credentials_path"] = "Platforms/google/credentials.json"
+
     print(f"\tsubject: {subject}\n\tto: {to}\n\tmessage_text: {message_text}")
-    return True
+
+    try:
+        send("wisdomnji@gmail.com", to, subject, message_text, "Wisdom Nji", userDetails)
+    except Exception as error:
+        raise Exception(error)
+    else:
+        return True
 
 if __name__ == '__main__':
     sender_name = input(">> Your name:")
