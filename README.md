@@ -1,3 +1,7 @@
+##### Requirements
+- credentials.json 
+_maybe set your app type to TV and or other type to avoid OAuth redirect issues_
+
 # Notes
 - Developer needs to activate gmail for their account
 > https://console.cloud.google.com/apis/library/
