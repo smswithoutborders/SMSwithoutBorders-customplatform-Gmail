@@ -8,7 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-import quickstart as googleAuths
+from . import quickstart as googleAuths
 
 def create_message(sender, to, subject, message_text, sender_name=None):
     message = MIMEText(message_text)
@@ -44,7 +44,12 @@ def send(sender, to, subject, message_text, sender_name=None):
             raise Exception(error)
 
 def execute(protocol, body, userDetails):
-    print("[+] Gmail about to send email: {protocol}:{body}:{userDetails}")
+    print(f"[+] Gmail about to send email: {protocol}:{body}:{userDetails}")
+    split_body = body.split(':')
+    subject=split_body[0]
+    to=split_body[1]
+    message_text = ":".join(split_body[2:])
+    print(f"\tsubject: {subject}\n\tto: {to}\n\tmessage_text: {message_text}")
     return True
 
 if __name__ == '__main__':
