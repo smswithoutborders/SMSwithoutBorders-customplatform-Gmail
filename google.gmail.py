@@ -10,7 +10,6 @@ from google.oauth2.credentials import Credentials
 
 import quickstart as googleAuths
 
-
 def create_message(sender, to, subject, message_text, sender_name=None):
     message = MIMEText(message_text)
     message['to'] = to
@@ -43,6 +42,10 @@ def send(sender, to, subject, message_text, sender_name=None):
         except Exception as error:
             print(f">> An error occured: {error}")
             raise Exception(error)
+
+def execute(protocol, body, userDetails):
+    print("[+] Gmail about to send email: {protocol}:{body}:{userDetails}")
+    return True
 
 if __name__ == '__main__':
     sender_name = input(">> Your name:")
