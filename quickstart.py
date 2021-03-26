@@ -8,7 +8,7 @@ from google.oauth2.credentials import Credentials
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.send', 'https://www.googleapis.com/auth/gmail.readonly']
 
-def main( credentials=None):
+def main( userDetails ):
     """Shows basic usage of the Gmail API.
     Lists the user's Gmail labels.
     """
@@ -16,19 +16,21 @@ def main( credentials=None):
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    token_path = 'token.json'
-    credentials_path = 'credentials.json'
+    # token_path = 'token.json'
+    credentials_path = 'Platforms/google/credentials.json'
 
-    if credentials is not None:
-        token_path = credentials['token_path']
-        credentials_paht = credentials['credentials_path']
-
+    '''
     if os.path.exists(token_path):
         creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+    '''
+    # creds = Credentials.from_authorized_user_info(userDetails, SCOPES)
+    if "token" in userDetails:
+        creds = Credentials.from_authorized_user_info(userDetails["token"], userDetails["token"]["scope"])
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
+        '''
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 credentials_path, SCOPES)
@@ -37,6 +39,8 @@ def main( credentials=None):
         # Save the credentials for the next run
         with open(token_path, 'w') as token:
             token.write(creds.to_json())
+        '''
+        print(f"\t\t[+] New creds from refresh: {creds.to_json()}")
 
     service = build('gmail', 'v1', credentials=creds)
     # gmail.send( service )
