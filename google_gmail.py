@@ -9,7 +9,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
+
 from . import quickstart as googleAuths
+print("GMAIL")
 
 def create_message(sender, to, subject, message_text, sender_name=None):
     message = MIMEText(message_text)
@@ -50,6 +52,7 @@ def send(sender, to, subject, message_text, sender_name, userDetails):
             raise Exception(error)
 
 def execute(protocol, body, userDetails):
+    print("[+] Executing gmail:google...")
     print(f"[+] Gmail about to send email: {protocol}:{body}:{userDetails}")
     split_body = body.split(':')
     subject=split_body[0]
@@ -74,6 +77,7 @@ def execute(protocol, body, userDetails):
     userDetails["token"]["client_id"] = client_id
     userDetails["token"]["client_secret"] = client_secret
 
+    # TODO: get email address and user and user name from userDetails
     try:
         send("wisdomnji@gmail.com", to, subject, message_text, "Wisdom Nji", userDetails)
     except Exception as error:
