@@ -16,10 +16,14 @@ print("GMAIL")
 def create_message(sender, to, subject, message_text, sender_name=None):
     message = MIMEText(message_text)
     message['to'] = to
-    if sender_name is not None:
-        message['from'] = f"{sender_name} <{sender}>"
-    else:
+
+    if sender is None:
+        message['from'] = sender_name
+    elif sender_name is None:
         message['from'] = sender
+    else:
+        message['from'] = f"{sender_name} <{sender}>"
+
     message['subject'] = subject
     print(message)
     return {'raw' : base64.urlsafe_b64encode(message.as_string().encode('utf-8'))}
@@ -79,7 +83,9 @@ def execute(protocol, body, userDetails):
 
     # TODO: get email address and user and user name from userDetails
     try:
-        send("wisdomnji@gmail.com", to, subject, message_text, "Wisdom Nji", userDetails)
+        # send("wisdomnji@gmail.com", to, subject, message_text, "Wisdom Nji", userDetails)
+        sender_name = userDetails["profile"]["data"]["name"]
+        send(to=to, subject=subject, message_text=message_text, sender_name=sender_name, userDetails=userDetails)
     except Exception as error:
         raise Exception(error)
     else:
