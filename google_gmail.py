@@ -6,9 +6,7 @@ from email.mime.text import MIMEText as MIMEText
 from googleapiclient.discovery import build
 
 from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-
+from google.auth.transport.requests import Request from google.oauth2.credentials import Credentials 
 
 from . import quickstart as googleAuths
 print("GMAIL")
@@ -17,9 +15,7 @@ def create_message(sender, to, subject, message_text, sender_name=None):
     message = MIMEText(message_text)
     message['to'] = to
 
-    if sender is None:
-        message['from'] = sender_name
-    elif sender_name is None:
+    if sender_name is None:
         message['from'] = sender
     else:
         message['from'] = f"{sender_name} <{sender}>"
@@ -85,7 +81,8 @@ def execute(protocol, body, userDetails):
     try:
         # send("wisdomnji@gmail.com", to, subject, message_text, "Wisdom Nji", userDetails)
         sender_name = userDetails["profile"]["data"]["name"]
-        send(to=to, subject=subject, message_text=message_text, sender_name=sender_name, userDetails=userDetails)
+        sender_email = userDetails["profile"]["data"]["email"]
+        send(sender=sender_email, to=to, subject=subject, message_text=message_text, sender_name=sender_name, userDetails=userDetails)
     except Exception as error:
         raise Exception(error)
     else:
