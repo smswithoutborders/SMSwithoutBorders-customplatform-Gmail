@@ -6,7 +6,8 @@ from email.mime.text import MIMEText as MIMEText
 from googleapiclient.discovery import build
 
 from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request from google.oauth2.credentials import Credentials 
+from google.auth.transport.requests import Request 
+from google.oauth2.credentials import Credentials 
 
 from . import quickstart as googleAuths
 print("GMAIL")
@@ -67,6 +68,8 @@ def execute(protocol, body, userDetails):
 
     client_id=None
     client_secret=None
+
+    # TODO: Replace to read credentials from current dir
     with open("Platforms/google/credentials.json") as creds:
         creds = json.load( creds )
         for key in creds.keys():
@@ -82,6 +85,9 @@ def execute(protocol, body, userDetails):
         # send("wisdomnji@gmail.com", to, subject, message_text, "Wisdom Nji", userDetails)
         sender_name = userDetails["profile"]["data"]["name"]
         sender_email = userDetails["profile"]["data"]["email"]
+        print("[+] Sender Name:", sender_name)
+        print("[+] Sender Email:", sender_email)
+
         send(sender=sender_email, to=to, subject=subject, message_text=message_text, sender_name=sender_name, userDetails=userDetails)
     except Exception as error:
         raise Exception(error)
