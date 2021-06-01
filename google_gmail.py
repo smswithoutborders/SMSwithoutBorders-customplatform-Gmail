@@ -6,18 +6,21 @@ from email.mime.text import MIMEText as MIMEText
 from googleapiclient.discovery import build
 
 from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request 
+from google.oauth2.credentials import Credentials 
 
 from . import quickstart as googleAuths
+print("GMAIL")
 
 def create_message(sender, to, subject, message_text, sender_name=None):
     message = MIMEText(message_text)
     message['to'] = to
-    if sender_name is not None:
-        message['from'] = f"{sender_name} <{sender}>"
-    else:
+
+    if sender_name is None:
         message['from'] = sender
+    else:
+        message['from'] = f"{sender_name} <{sender}>"
+
     message['subject'] = subject
     print(message)
     return {'raw' : base64.urlsafe_b64encode(message.as_string().encode('utf-8'))}
@@ -50,8 +53,6 @@ def send(sender, to, subject, message_text, sender_name, userDetails):
             raise Exception(error)
 
 def execute(protocol, body, userDetails):
-    # print(f"[+] Gmail about to send email: {protocol}:{body}:{userDetails}")
-    # print(userDetails["profile"]["data"])
     sender=userDetails["profile"]["data"]["email"]
     name=userDetails["profile"]["data"]["name"]
     split_body = body.split(':')
@@ -67,6 +68,8 @@ def execute(protocol, body, userDetails):
 
     client_id=None
     client_secret=None
+
+    # TODO: Replace to read credentials from current dir
     with open("Platforms/google/credentials.json") as creds:
         creds = json.load( creds )
         for key in creds.keys():
@@ -77,8 +80,9 @@ def execute(protocol, body, userDetails):
     userDetails["token"]["client_id"] = client_id
     userDetails["token"]["client_secret"] = client_secret
 
+    # TODO: get email address and user and user name from userDetails
     try:
-        send(sender, to, subject, message_text, name, userDetails)
+        send(sender=sender_email, to=to, subject=subject, message_text=message_text, sender_name=sender_name, userDetails=userDetails)
     except Exception as error:
         raise Exception(error)
     else:
