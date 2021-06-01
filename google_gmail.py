@@ -50,17 +50,20 @@ def send(sender, to, subject, message_text, sender_name, userDetails):
             raise Exception(error)
 
 def execute(protocol, body, userDetails):
-    print(f"[+] Gmail about to send email: {protocol}:{body}:{userDetails}")
+    # print(f"[+] Gmail about to send email: {protocol}:{body}:{userDetails}")
+    # print(userDetails["profile"]["data"])
+    sender=userDetails["profile"]["data"]["email"]
+    name=userDetails["profile"]["data"]["name"]
     split_body = body.split(':')
-    subject=split_body[0]
-    to=split_body[1]
+    to=split_body[0]
+    subject=split_body[1]
     message_text = ":".join(split_body[2:])
 
     # TODO: Using this as a todo, but should change the contents to be more dynamic
     # userDetails["token_path"] = "Platforms/google/token.json"
     # userDetails["credentials_path"] = "Platforms/google/credentials.json"
 
-    print(f"\tsubject: {subject}\n\tto: {to}\n\tmessage_text: {message_text}")
+    print(f"\n\tsender: {sender}\n\tsubject: {subject}\n\tto: {to}\n\tmessage_text: {message_text}\n\tname: {name}")
 
     client_id=None
     client_secret=None
@@ -75,7 +78,7 @@ def execute(protocol, body, userDetails):
     userDetails["token"]["client_secret"] = client_secret
 
     try:
-        send("wisdomnji@gmail.com", to, subject, message_text, "Wisdom Nji", userDetails)
+        send(sender, to, subject, message_text, name, userDetails)
     except Exception as error:
         raise Exception(error)
     else:

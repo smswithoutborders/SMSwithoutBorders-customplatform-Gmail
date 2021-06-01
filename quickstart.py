@@ -25,6 +25,7 @@ def main( userDetails ):
     '''
     # creds = Credentials.from_authorized_user_info(userDetails, SCOPES)
     if "token" in userDetails:
+        print(userDetails["token"]["scope"])
         creds = Credentials.from_authorized_user_info(userDetails["token"], userDetails["token"]["scope"])
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
