@@ -80,9 +80,11 @@ def execute(protocol, body, userDetails):
     userDetails["token"]["client_id"] = client_id
     userDetails["token"]["client_secret"] = client_secret
 
-    # TODO: get email address and user and user name from userDetails
+    userDetails["token"]["scope"] = userDetails["token"]["scope"].replace("openid ", '');
+    userDetails["token"]["scope"] = userDetails["token"]["scope"].split(' ')
+
     try:
-        send(sender=sender_email, to=to, subject=subject, message_text=message_text, sender_name=sender_name, userDetails=userDetails)
+        send(sender=sender, to=to, subject=subject, message_text=message_text, sender_name=name, userDetails=userDetails)
     except Exception as error:
         raise Exception(error)
     else:
