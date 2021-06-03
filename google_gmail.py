@@ -26,6 +26,7 @@ def create_message(sender, to, subject, message_text, sender_name=None):
     return {'raw' : base64.urlsafe_b64encode(message.as_string().encode('utf-8'))}
 
 def send(sender, to, subject, message_text, sender_name, userDetails):
+    print(">> sending email....")
     try:
         if userDetails is not None:
             service = googleAuths.main(userDetails)
