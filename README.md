@@ -1,6 +1,6 @@
 ##### Requirements
 - credentials.json 
-_maybe set your app type to TV and or other type to avoid OAuth redirect issues_
+- > You can get this file by going to your google console and downloading your credentials. Then copy it to the root dir of the project and renaming it to credentials.json
 
 # Notes
 - Developer needs to activate gmail for their account
