@@ -10,7 +10,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials 
 
 from . import quickstart as googleAuths
-print("GMAIL")
+# print("GMAIL")
 
 def create_message(sender, to, subject, message_text, sender_name=None):
     message = MIMEText(message_text)
@@ -71,7 +71,8 @@ def execute(protocol, body, userDetails):
     client_secret=None
 
     # TODO: Replace to read credentials from current dir
-    with open("Platforms/google/credentials.json") as creds:
+    creds_path = os.path.join(os.path.dirname(__file__), '', 'credentials.json')
+    with open(creds_path) as creds:
         creds = json.load( creds )
         for key in creds.keys():
             if "client_id" in creds[key] and "client_secret" in creds[key]:
