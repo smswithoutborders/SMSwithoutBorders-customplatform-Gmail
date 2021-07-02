@@ -10,7 +10,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials 
 
 from . import quickstart as googleAuths
-print("GMAIL")
+# print("GMAIL")
 
 def create_message(sender, to, subject, message_text, sender_name=None):
     message = MIMEText(message_text)
