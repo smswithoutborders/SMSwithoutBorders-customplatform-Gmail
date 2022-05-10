@@ -1,14 +1,24 @@
-##### Requirements
-- credentials.json 
-- > You can get this file by going to your google console and downloading your credentials. Then copy it to the root dir of the project and renaming it to credentials.json
+# Gmail Send
 
-# Notes
-- Developer needs to activate gmail for their account
-> https://console.cloud.google.com/apis/library/
-- Then download the needed credentials.json from there
-> _On your gmail console: add your email as a test email_
+## How to test
 
-##### How it parses body
+Test scripts are found in the dir `test/`.
+
+The test attempts to acquire your token and stores in the path:
+
+`test/token.json`
+
+To run the test, you will need your [**credentials.json**](https://console.cloud.google.com/) which can be downloaded from Google cloud console.
+
+Place the credentials file in the `test/` directory (make sure the file is called credentials.json).
+
+The flow runs on `port 8000`, be sure to have this added to list of redirect origins in your cloud console.
+
+To run the test and acquire the token file only.
+
+```bash
+python3 test/main --log INFO --mode get-token-only
 ```
-message_body = subject:recipient:message
-```
+
+This should begin a flow for the Google OAuth service. 
+
