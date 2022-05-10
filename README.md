@@ -17,7 +17,7 @@ The flow runs on `port 8000`, be sure to have this added to list of redirect ori
 To run the test and acquire the token file only.
 
 ```bash
-python3 test/main --log INFO --mode get-token-only
+python3 test/main.py --log INFO --mode get-token-only
 ```
 
 This should begin a flow for the Google OAuth service. 
