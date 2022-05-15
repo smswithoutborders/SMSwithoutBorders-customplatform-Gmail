@@ -5,3 +5,6 @@ __pycache__/*
 */__pycache__/*
 token.json
 .token.json
+**/credentials.json
+**/token.json
+venv/*
