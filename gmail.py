@@ -1,6 +1,12 @@
-import os.path
+import os
+import sys
+import logging
+
 import base64
 import json
+
+from inspect import getsourcefile
+from os.path import abspath
 
 from email.mime.text import MIMEText as MIMEText
 from googleapiclient.discovery import build
