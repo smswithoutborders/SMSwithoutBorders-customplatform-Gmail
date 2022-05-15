@@ -8,95 +8,149 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request 
 from google.oauth2.credentials import Credentials 
+from googleapiclient.discovery import build
 
-from . import quickstart as googleAuths
-# print("GMAIL")
+dir_path = os.path.dirname(abspath(getsourcefile(lambda:0)))
+sys.path.insert(0, dir_path)
 
-def create_message(sender, to, subject, message_text, sender_name=None):
-    message = MIMEText(message_text)
+def __get_service__(user_details: dict):
+    """Shows basic usage of the Gmail API.
+    Lists the user's Gmail labels.
+    """
+    creds = None
+    credentials_filepath = os.path.join(
+            os.path.dirname(__file__), '../configs', 'credentials.json')
+
+    logging.debug("user_details: %s", user_details)
+    creds = Credentials.from_authorized_user_info(
+            user_details["token"], user_details["token"]["scope"])
+
+    if not creds or not creds.valid:
+
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+
+    service = build('gmail', 'v1', credentials=creds)
+    return service
+
+
+def __create_message__(
+        sender_email: str, 
+        to: str, 
+        subject: str, 
+        body: str, 
+        sender_name=None) -> dict:
+    """
+    """
+    message = MIMEText(body)
     message['to'] = to
 
     if sender_name is None:
         message['from'] = sender
     else:
-        message['from'] = f"{sender_name} <{sender}>"
+        message['from'] = f"{sender_name} <{sender_email}>"
 
     message['subject'] = subject
-    print(message)
     return {'raw' : base64.urlsafe_b64encode(message.as_string().encode('utf-8'))}
 
-def send(sender, to, subject, message_text, sender_name, userDetails):
-    print(">> sending email....")
-    try:
-        if userDetails is not None:
-            service = googleAuths.main(userDetails)
-        else:
-            # service = googleAuths.main()
-            print("[-] No user credentials for gmail available")
-            raise Exception("Missing user credentials to send...")
-    except Exception as error:
-        raise Exception(error)
-    else:
-        message = create_message(sender, to, subject, message_text, sender_name)
-        message['raw'] = message['raw'].decode('utf-8')
+def send(
+        sender_email: str, 
+        to: str, 
+        subject: str, 
+        body: str, 
+        sender_name: str, 
+        service) -> None:
+    """
+    """
+    message = __create_message__(
+            sender_email=sender_email, 
+            to=to, 
+            subject=subject, 
+            body=body, 
+            sender_name=sender_name)
 
-        print(">> Gmail Send Service...")
-        print(message)
-        print(service)
+    logging.debug(message)
+
+    message['raw'] = message['raw'].decode('utf-8')
+
+    try:
+        user_id = "me"
+        message = (
+                service.
+                users().
+                messages().
+                send(userId=user_id, body=message).execute())
+
+    except Exception as error:
+        raise error
+
+def parse_input(body: str) -> tuple:
+    """
+    """
+    body = body.split(':')
+
+    to=body[0]
+    cc=body[1]
+    bcc=body[2]
+    subject=body[3]
+    body = ":".join(body[4:])
+
+
+    return to, cc, bcc, subject, body
+
+
+def execute(body: str, user_details: dict) -> None:
+    """
+    {to}:{cc}:{bcc}:{subject}:{<message body>}
+    """
+
+    to, cc, bcc, subject, body = parse_input(body=body)
+    credentials_filepath = os.path.join(os.path.dirname(__file__), 'configs', 'credentials.json')
+    try:
+        creds_fd = open(credentials_filepath)
+        credentials = json.load( creds_fd )
+        client_id = credentials["web"]["client_id"]
+        client_secret = credentials["web"]["client_secret"]
+
+    except Exception as error:
+        raise error
+
+    else:
+        logging.debug("client id: %s", client_id)
+        logging.debug("client secret: %s", client_secret)
 
         try:
-            user_id = "me"
-            message = (service.users().messages().send(userId=user_id, body=message).execute())
-            print(message)
+            user_details["token"]["client_id"] = client_id
+
+            user_details["token"]["client_secret"] = client_secret
+
+            user_details["token"]["scope"] = \
+                    user_details["token"]["scope"].replace("openid ", '')
+
+            user_details["token"]["scope"] = \
+                    user_details["token"]["scope"].split(' ')
+
+            user_tokens = user_details["token"]
+            user_token_scopes = user_details["token"]["scope"]
+
+            sender_email = user_details["uniqueId"]
+            sender_name = user_details["username"]
+
+            service = __get_service__(user_details)
+            send(
+                    sender_email = sender_email, 
+                    to = to, 
+                    subject = subject, 
+                    body = body, 
+                    sender_name = sender_name, 
+                    service = service)
 
         except Exception as error:
-            print(f">> An error occured: {error}")
-            raise Exception(error)
+            raise error
+        else:
+            logging.debug("Email sent successfully")
 
-def execute(protocol, body, userDetails):
-    sender=userDetails["profile"]["data"]["email"]
-    name=userDetails["profile"]["data"]["name"]
-    split_body = body.split(':')
-    to=split_body[0]
-    subject=split_body[1]
-    message_text = ":".join(split_body[2:])
+    finally:
+        creds_fd.close()
 
-    # TODO: Using this as a todo, but should change the contents to be more dynamic
-    # userDetails["token_path"] = "Platforms/google/token.json"
-    # userDetails["credentials_path"] = "Platforms/google/credentials.json"
 
-    print(f"\n\tsender: {sender}\n\tsubject: {subject}\n\tto: {to}\n\tmessage_text: {message_text}\n\tname: {name}")
-
-    client_id=None
-    client_secret=None
-
-    # TODO: Replace to read credentials from current dir
-    creds_path = os.path.join(os.path.dirname(__file__), '', 'credentials.json')
-    with open(creds_path) as creds:
-        creds = json.load( creds )
-        for key in creds.keys():
-            if "client_id" in creds[key] and "client_secret" in creds[key]:
-                client_id = creds[key]["client_id"]
-                client_secret = creds[key]["client_secret"]
-                break
-    userDetails["token"]["client_id"] = client_id
-    userDetails["token"]["client_secret"] = client_secret
-
-    userDetails["token"]["scope"] = userDetails["token"]["scope"].replace("openid ", '');
-    userDetails["token"]["scope"] = userDetails["token"]["scope"].split(' ')
-
-    try:
-        send(sender=sender, to=to, subject=subject, message_text=message_text, sender_name=name, userDetails=userDetails)
-    except Exception as error:
-        raise Exception(error)
-    else:
-        return True
-
-if __name__ == '__main__':
-    sender_name = input(">> Your name:")
-    sender = input(">> Sender email address:")
-    to = input(">> Receipient email address:")
-    subject = input(">> Email subject:")
-    message_text=input("[+] Message:")
-
-    send(sender, to, subject, message_text, sender_name)
