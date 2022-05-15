@@ -1,6 +1,11 @@
-import os.path
+import os
+import sys
+
 import base64
 import json
+
+from inspect import getsourcefile
+from os.path import abspath
 
 from email.mime.text import MIMEText as MIMEText
 from googleapiclient.discovery import build
@@ -9,7 +14,10 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request 
 from google.oauth2.credentials import Credentials 
 
-from . import quickstart as googleAuths
+dir_path = os.path.dirname(abspath(getsourcefile(lambda:0)))
+sys.path.insert(0, dir_path)
+
+import quickstart as googleAuths
 # print("GMAIL")
 
 def create_message(sender, to, subject, message_text, sender_name=None):
