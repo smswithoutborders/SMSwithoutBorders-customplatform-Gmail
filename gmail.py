@@ -3,6 +3,7 @@ import sys
 
 import base64
 import json
+import logging
 
 from inspect import getsourcefile
 from os.path import abspath
@@ -33,11 +34,11 @@ def create_message(sender, to, subject, message_text, sender_name=None):
     print(message)
     return {'raw' : base64.urlsafe_b64encode(message.as_string().encode('utf-8'))}
 
-def send(sender, to, subject, message_text, sender_name, userDetails):
+def send(sender, to, subject, message_text, sender_name, user_details):
     print(">> sending email....")
     try:
-        if userDetails is not None:
-            service = googleAuths.main(userDetails)
+        if user_details is not None:
+            service = googleAuths.main(user_details)
         else:
             # service = googleAuths.main()
             print("[-] No user credentials for gmail available")
@@ -61,44 +62,60 @@ def send(sender, to, subject, message_text, sender_name, userDetails):
             print(f">> An error occured: {error}")
             raise Exception(error)
 
-def execute(protocol, body, userDetails):
-    sender=userDetails["profile"]["data"]["email"]
-    name=userDetails["profile"]["data"]["name"]
-    split_body = body.split(':')
-    to=split_body[0]
-    subject=split_body[1]
-    message_text = ":".join(split_body[2:])
+def execute(body: str, user_details: dict) -> None:
+    """
+    {to}:{cc}:{bcc}:{subject}:{<message body>}
+    """
 
-    # TODO: Using this as a todo, but should change the contents to be more dynamic
-    # userDetails["token_path"] = "Platforms/google/token.json"
-    # userDetails["credentials_path"] = "Platforms/google/credentials.json"
+    body = body.split(':')
+    to=body[0]
+    cc=body[1]
+    bcc=body[2]
+    subject=body[3]
+    message = ":".join(body[4:])
 
-    print(f"\n\tsender: {sender}\n\tsubject: {subject}\n\tto: {to}\n\tmessage_text: {message_text}\n\tname: {name}")
+
+    logging.debug("to: %s", to)
+    logging.debug("cc: %s", cc)
+    logging.debug("bcc: %s", bcc)
+    logging.debug("subject: %s", subject)
+    logging.debug("message: %s", message)
 
     client_id=None
     client_secret=None
 
-    # TODO: Replace to read credentials from current dir
-    creds_path = os.path.join(os.path.dirname(__file__), '', 'credentials.json')
-    with open(creds_path) as creds:
-        creds = json.load( creds )
-        for key in creds.keys():
-            if "client_id" in creds[key] and "client_secret" in creds[key]:
-                client_id = creds[key]["client_id"]
-                client_secret = creds[key]["client_secret"]
-                break
-    userDetails["token"]["client_id"] = client_id
-    userDetails["token"]["client_secret"] = client_secret
+    credentials_filepath = os.path.join(os.path.dirname(__file__), 'configs', 'credentials.json')
+    try:
+        creds_fd = open(credentials_filepath)
+        credentials = json.load( creds_fd )
+        client_id = credentials["web"]["client_id"]
+        client_secret = credentials["web"]["client_secret"]
 
-    userDetails["token"]["scope"] = userDetails["token"]["scope"].replace("openid ", '');
-    userDetails["token"]["scope"] = userDetails["token"]["scope"].split(' ')
+    except Exception as error:
+        raise error
+
+    else:
+        logging.debug("client id: %s", client_id)
+        logging.debug("client secret: %s", client_secret)
+    finally:
+        creds_fd.close()
+
+    """
+
+    sender = user_details["username"]
+    user_details["token"]["client_id"] = client_id
+    user_details["token"]["client_secret"] = client_secret
+
+    user_details["token"]["scope"] = user_details["token"]["scope"].replace("openid ", '');
+    user_details["token"]["scope"] = user_details["token"]["scope"].split(' ')
 
     try:
-        send(sender=sender, to=to, subject=subject, message_text=message_text, sender_name=name, userDetails=userDetails)
+        send(sender=sender, to=to, subject=subject, message_text=message_text, sender_name=name, user_details=user_details)
     except Exception as error:
         raise Exception(error)
     else:
         return True
+    """
 
 if __name__ == '__main__':
     sender_name = input(">> Your name:")
