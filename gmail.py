@@ -43,6 +43,8 @@ def __get_service__(user_details: dict):
 def __create_message__(
         sender_email: str, 
         to: str, 
+        cc: str,
+        bcc: str,
         subject: str, 
         body: str, 
         sender_name=None) -> dict:
@@ -50,6 +52,8 @@ def __create_message__(
     """
     message = MIMEText(body)
     message['to'] = to
+    message['cc'] = cc
+    message['bcc'] = bcc
 
     if sender_name is None:
         message['from'] = sender
@@ -62,6 +66,8 @@ def __create_message__(
 def send(
         sender_email: str, 
         to: str, 
+        cc: str,
+        bcc: str,
         subject: str, 
         body: str, 
         sender_name: str, 
@@ -71,6 +77,8 @@ def send(
     message = __create_message__(
             sender_email=sender_email, 
             to=to, 
+            cc=cc,
+            bcc=bcc,
             subject=subject, 
             body=body, 
             sender_name=sender_name)
@@ -100,7 +108,6 @@ def parse_input(body: str) -> tuple:
     bcc=body[2]
     subject=body[3]
     body = ":".join(body[4:])
-
 
     return to, cc, bcc, subject, body
 
@@ -146,6 +153,8 @@ def execute(body: str, user_details: dict) -> None:
             send(
                     sender_email = sender_email, 
                     to = to, 
+                    cc = cc,
+                    bcc = bcc,
                     subject = subject, 
                     body = body, 
                     sender_name = sender_name, 
