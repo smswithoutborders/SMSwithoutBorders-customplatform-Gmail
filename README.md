@@ -1,5 +1,10 @@
 # Gmail Send
 
+## How to configure for Publisher
+
+Once installed copy your [**credentials.json**](https://console.cloud.google.com/) file to `configs/`
+
+
 ## How to test
 
 Test scripts are found in the dir `test/`.
