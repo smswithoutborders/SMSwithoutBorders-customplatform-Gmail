@@ -41,7 +41,7 @@ class Gmail:
 
             auth_uri = flow.authorization_url()
 
-            return auth_uri[0]
+            return {"url":auth_uri[0]}
 
         except HttpError as error:
             logger.error('Google-client lib error at init. See logs below')
