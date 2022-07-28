@@ -18,7 +18,7 @@ if not os.path.exists(creds):
     raise FileNotFoundError(error)
 
 class Gmail:
-    def __init__(self) -> None:
+    def __init__(self, originalUrl:str) -> None:
         """
         """
         self.credentials = creds
@@ -28,18 +28,18 @@ class Gmail:
             'https://www.googleapis.com/auth/userinfo.profile',
             'https://www.googleapis.com/auth/userinfo.email'
         ]
-
-    def init(self, originalUrl) -> str:
-        """
-        """
-        try:
-            flow = Flow.from_client_secrets_file(
+        self.originalUrl=originalUrl
+        self.gmail=Flow.from_client_secrets_file(
                 self.credentials,
                 scopes = self.scopes,
                 redirect_uri = f'{originalUrl}platforms/gmail/protocols/oauth2/redirect_codes/'
             )
 
-            auth_uri = flow.authorization_url()
+    def init(self) -> str:
+        """
+        """
+        try:
+            auth_uri = self.gmail.authorization_url()
 
             return {"url":auth_uri[0]}
 
@@ -51,18 +51,12 @@ class Gmail:
             logger.error('Gmail-OAuth2-init failed. See logs below')
             raise error
 
-    def validate(self, originalUrl: str, code: str) -> dict:
+    def validate(self, code: str) -> dict:
         """
         """
         try:
-            flow = Flow.from_client_secrets_file(
-                self.credentials,
-                scopes = self.scopes,
-                redirect_uri = f'{originalUrl}platforms/gmail/protocols/oauth2/redirect_codes/'
-            )
-
-            flow.fetch_token(code=code)
-            credentials = flow.credentials
+            self.gmail.fetch_token(code=code)
+            credentials = self.gmail.credentials
 
             user_info_service = build('oauth2', 'v2', credentials=credentials)
             user_info = user_info_service.userinfo().get().execute()
