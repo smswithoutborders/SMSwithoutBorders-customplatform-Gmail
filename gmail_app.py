@@ -41,6 +41,8 @@ class Gmail:
         try:
             auth_uri = self.gmail.authorization_url()
 
+            logger.info("- Successfully fetched init url")
+
             return {"url":auth_uri[0]}
 
         except HttpError as error:
@@ -60,6 +62,8 @@ class Gmail:
 
             user_info_service = build('oauth2', 'v2', credentials=credentials)
             user_info = user_info_service.userinfo().get().execute()
+
+            logger.info("- Successfully fetched token and profile")
 
             return {
                 "profile": user_info,
@@ -89,6 +93,8 @@ class Gmail:
 
             status_code = getattr(revoke, 'status_code')
             if status_code == 200:
+                logger.info("- Successfully revoked access")
+
                 return True
             else:
                 raise Exception(getattr(revoke, 'reason'))
