@@ -11,17 +11,17 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-creds = os.path.join(os.path.dirname(__file__), 'configs', 'credentials.json')
+credentials_filepath = os.path.join(os.path.dirname(__file__), 'configs', 'credentials.json')
 
-if not os.path.exists(creds):
-    error = "credentials.json file not found at %s" % creds
+if not os.path.exists(credentials_filepath):
+    error = "credentials.json file not found at %s" % credentials_filepath
     raise FileNotFoundError(error)
 
 class Gmail:
     def __init__(self, originalUrl:str) -> None:
         """
         """
-        self.credentials = creds
+        self.credentials_filepath = credentials_filepath
         self.scopes = [
             'openid',
             'https://www.googleapis.com/auth/gmail.send',
@@ -30,9 +30,9 @@ class Gmail:
         ]
         self.originalUrl=originalUrl
         self.gmail=Flow.from_client_secrets_file(
-                self.credentials,
+                self.credentials_filepath,
                 scopes = self.scopes,
-                redirect_uri = f'{originalUrl}platforms/gmail/protocols/oauth2/redirect_codes/'
+                redirect_uri = f'{originalUrl}/platforms/gmail/protocols/oauth2/redirect_codes/'
             )
 
     def init(self) -> str:
@@ -82,22 +82,43 @@ class Gmail:
         """
         """
         try:
-            credentials = json.loads(token)
-            credentials = Credentials.from_authorized_user_info(credentials, self.scopes)
+            try:
+                creds_fd = open(credentials_filepath)
+                credentials = json.load( creds_fd )
+                client_id = credentials["web"]["client_id"]
+                client_secret = credentials["web"]["client_secret"]
 
-            if not credentials or not credentials.valid:
-                if credentials and credentials.expired and credentials.refresh_token:
-                    credentials.refresh(Request())
-            
-            revoke = requests.post('https://oauth2.googleapis.com/revoke', params={'token': credentials.token}, headers = {'content-type': 'application/x-www-form-urlencoded'})
+            except Exception as error:
+                logger.error("Error loading credentials file")
+                raise error
 
-            status_code = getattr(revoke, 'status_code')
-            if status_code == 200:
-                logger.info("- Successfully revoked access")
+            else: 
+                grant = json.loads(token)
 
-                return True
-            else:
-                raise Exception(getattr(revoke, 'reason'))
+                if not "client_id" in grant:
+                    grant["client_id"] = client_id
+                
+                if not "client_secret" in grant:
+                    grant["client_secret"] = client_secret
+                
+                if not "scopes" in grant:
+                    grant["scopes"] = grant["scope"].split(' ')
+
+                grant = Credentials.from_authorized_user_info(grant, self.scopes)
+
+                if not grant or not grant.valid:
+                    if grant and grant.expired and grant.refresh_token:
+                        grant.refresh(Request())
+                
+                revoke = requests.post('https://oauth2.googleapis.com/revoke', params={'token': grant.token}, headers = {'content-type': 'application/x-www-form-urlencoded'})
+
+                status_code = getattr(revoke, 'status_code')
+                if status_code == 200:
+                    logger.info("- Successfully revoked access")
+
+                    return True
+                else:
+                    raise Exception(getattr(revoke, 'reason'))
 
         except HttpError as error:
             logger.error('Google-client lib error at revoke. See logs below')
