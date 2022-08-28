@@ -78,7 +78,7 @@ class Gmail:
             logger.error('Gmail-OAuth2-validate failed. See logs below')
             raise error
 
-    def revoke(self, token: str) -> None:
+    def revoke(self, token: dict) -> None:
         """
         """
         try:
@@ -93,18 +93,16 @@ class Gmail:
                 raise error
 
             else: 
-                grant = json.loads(token)
-
-                if not "client_id" in grant:
-                    grant["client_id"] = client_id
+                if not "client_id" in token:
+                    token["client_id"] = client_id
                 
-                if not "client_secret" in grant:
-                    grant["client_secret"] = client_secret
+                if not "client_secret" in token:
+                    token["client_secret"] = client_secret
                 
-                if not "scopes" in grant:
-                    grant["scopes"] = grant["scope"].split(' ')
+                if not "scopes" in token:
+                    token["scopes"] = token["scope"].split(' ')
 
-                grant = Credentials.from_authorized_user_info(grant, self.scopes)
+                grant = Credentials.from_authorized_user_info(token, self.scopes)
 
                 if not grant or not grant.valid:
                     if grant and grant.expired and grant.refresh_token:
