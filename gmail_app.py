@@ -17,6 +17,11 @@ if not os.path.exists(credentials_filepath):
     error = "credentials.json file not found at %s" % credentials_filepath
     raise FileNotFoundError(error)
 
+class MisMatchScope(Exception):
+    def __init__(self, message="Scope mismatch"):
+        self.message = message
+        super().__init__(self.message)
+
 class Gmail:
     def __init__(self, originalUrl:str) -> None:
         """
@@ -53,10 +58,15 @@ class Gmail:
             logger.error('Gmail-OAuth2-init failed. See logs below')
             raise error
 
-    def validate(self, code: str) -> dict:
+    def validate(self, code: str, scope: str) -> dict:
         """
         """
         try:
+            for item in self.scopes:
+                if item not in scope.split(" "):
+                    logger.error("Missing scope %s" % item)
+                    raise MisMatchScope()
+
             self.gmail.fetch_token(code=code)
             credentials = self.gmail.credentials
 
