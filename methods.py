@@ -22,8 +22,8 @@ class MisMatchScope(Exception):
         self.message = message
         super().__init__(self.message)
 
-class Gmail:
-    def __init__(self, originalUrl:str) -> None:
+class Methods:
+    def __init__(self, origin:str) -> None:
         """
         """
         self.credentials_filepath = credentials_filepath
@@ -33,14 +33,14 @@ class Gmail:
             'https://www.googleapis.com/auth/userinfo.profile',
             'https://www.googleapis.com/auth/userinfo.email'
         ]
-        self.originalUrl=originalUrl
+        self.origin=origin
         self.gmail=Flow.from_client_secrets_file(
                 self.credentials_filepath,
                 scopes = self.scopes,
-                redirect_uri = f'{originalUrl}/platforms/gmail/protocols/oauth2/redirect_codes/'
+                redirect_uri = f'{origin}/platforms/gmail/protocols/oauth2/redirect_codes/'
             )
 
-    def init(self) -> str:
+    def authorize(self) -> str:
         """
         """
         try:
@@ -88,7 +88,7 @@ class Gmail:
             logger.error('Gmail-OAuth2-validate failed. See logs below')
             raise error
 
-    def revoke(self, token: dict) -> None:
+    def invalidate(self, token: dict) -> None:
         """
         """
         try:
